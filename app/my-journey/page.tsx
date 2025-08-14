@@ -1,22 +1,28 @@
-import CompanionList from "@/components/CompanionList"
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion"
-import { getUserCompanions, getUserSessions } from "@/lib/actions/companion.actions"
-import { currentUser } from "@clerk/nextjs/server"
-import Image from "next/image"
-import { redirect } from "next/navigation"
+} from "@/components/ui/accordion";
+import { currentUser } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
+import {
+  getUserCompanions,
+  getUserSessions,
+  getBookmarkedCompanions,
+} from "@/lib/actions/companion.actions";
+import Image from "next/image";
+import CompanionList from "@/components/CompanionList";
 
 const Profile = async () => {
-  const user = await currentUser()
+  const user = await currentUser();
 
-  if(!user) redirect('/sign-in')
+  if (!user) redirect("/sign-in");
 
-    const companions = await getUserCompanions(user.id)
-    const sessionHistory = await getUserSessions(user.id)
+  const companions = await getUserCompanions(user.id);
+  const sessionHistory = await getUserSessions(user.id);
+  const bookmarkedCompanions = await getBookmarkedCompanions(user.id);
+
   return (
     <main className="min-lg:w-3/4">
       <section className="flex justify-between gap-4 max-sm:flex-col items-center">
@@ -59,21 +65,38 @@ const Profile = async () => {
         </div>
       </section>
       <Accordion type="multiple">
-          <AccordionItem value="recent">
-            <AccordionTrigger className="text-2xl font-bold">Recent Sessions</AccordionTrigger>
-            <AccordionContent>
-              <CompanionList title="Recent Sessions" companions={sessionHistory} />
-            </AccordionContent>
-          </AccordionItem>
-          <AccordionItem value="companions">
-            <AccordionTrigger className="text-2xl font-bold">My Companions {`(${companions.length})`}</AccordionTrigger>
-            <AccordionContent>
-              <CompanionList title="My Companions" companions={companions} />
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+        <AccordionItem value="bookmarks">
+          <AccordionTrigger className="text-2xl font-bold">
+            Bookmarked Companions {`(${bookmarkedCompanions.length})`}
+          </AccordionTrigger>
+          <AccordionContent>
+            <CompanionList
+              companions={bookmarkedCompanions}
+              title="Bookmarked Companions"
+            />
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="recent">
+          <AccordionTrigger className="text-2xl font-bold">
+            Recent Sessions
+          </AccordionTrigger>
+          <AccordionContent>
+            <CompanionList
+              title="Recent Sessions"
+              companions={sessionHistory}
+            />
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="companions">
+          <AccordionTrigger className="text-2xl font-bold">
+            My Companions {`(${companions.length})`}
+          </AccordionTrigger>
+          <AccordionContent>
+            <CompanionList title="My Companions" companions={companions} />
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
     </main>
-  )
-}
-
-export default Profile
+  );
+};
+export default Profile;
