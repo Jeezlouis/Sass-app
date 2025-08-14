@@ -14,10 +14,25 @@ const CompanionSession = async ({ params }: CompanionSessionPageProps) => {
     const companion = await getCompanion(id);
     const user = await currentUser();
 
+    // Check if user exists first
+    if(!user) redirect('/sign-in');
+    
+    // Check if companion exists and handle the undefined case
+    if(!companion) {
+        console.error(`Companion with id ${id} not found`);
+        redirect('/companions');
+        return null; // This won't be reached due to redirect, but TypeScript needs it
+    }
+
+    // Now we can safely destructure since we know companion exists
     const { name, subject, title, topic, duration } = companion;
 
-    if(!user) redirect('/sign-in');
-    if(!name) redirect('/companions')
+    // Additional check for required companion properties
+    if(!name) {
+        console.error(`Companion ${id} is missing required name property`);
+        redirect('/companions');
+        return null;
+    }
 
     return (
         <main>
